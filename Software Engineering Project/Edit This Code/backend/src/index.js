@@ -40,7 +40,7 @@ const validateStudent = [
 // Add validation middleware for updates
 const validateStudentUpdate = [
   body('firstName').trim().notEmpty().withMessage('First name is required'),
-  body('lastName').trim().withMessage('Last name is required'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required'),
   body('score')
     .isFloat({ min: 0, max: 100 })
     .withMessage('Score must be between 0 and 100')
