@@ -31,10 +31,15 @@ function App() {
       // 2. Make API request with sort parameters
       // 3. Update students state
       // 4. Handle errors
+     setLoading(true);
+      const response = await axios.get(`${API_URL}/students`, {
+        params: { sortBy, order: sortOrder }
+      });
+      setStudents(response.data);
     } catch (error) {
       console.error('Error fetching students:', error);
     } finally {
-      // TODO: Reset loading state
+      setLoading(false);
     }
   }, [sortBy, sortOrder]);
 
