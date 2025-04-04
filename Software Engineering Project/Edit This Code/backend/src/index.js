@@ -76,7 +76,9 @@ app.get('/api/students/average', async (req, res) => {
     // TODO: Implement average calculation
     // 1. Query database for average score
     // 2. Handle case when no students exist
-    // 3. Return average score
+   //3. Return average score
+   const [result] = await pool.query('SELECT AVG(score) as average FROM students');
+    res.json({ average: result[0].average || 0 });
   } catch (error) {
     console.error('Error calculating average:', error);
     res.status(500).json({ error: 'Internal server error' });
