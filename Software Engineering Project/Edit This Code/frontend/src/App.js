@@ -58,7 +58,18 @@ function App() {
     fetchAverage();
   }, [sortBy, sortOrder, fetchStudents, fetchAverage]);
 
-  // TODO: Implement form validation
+const response = await axios.get(`${API_URL}/students/average`);
+      setAverage(Number(response.data.average));
+    } catch (error) {
+      console.error('Error fetching average:', error);
+      setAverage(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStudents();
+    fetchAverage();
+  }, [sortBy, sortOrder, fetchStudents, fetchAverage]);  // TODO: Implement form validation
   // Hint: Validate all required fields and their constraints
   const validateForm = () => {
     const newErrors = {};
