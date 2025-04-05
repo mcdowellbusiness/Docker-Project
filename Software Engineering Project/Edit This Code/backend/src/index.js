@@ -88,9 +88,36 @@ app.put('/api/students/:id', validateStudentUpdate, async (req, res) => {
   try {
     // TODO: Implement student update
     // 1. Validate request body
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    
+    const { id } = req.params;
+    const { firstName, middleName, lastName, score } = req.body;
+    
     // 2. Check if student exists
+    
+    const [existing] = await pool.query(
+        'SELECT id FROM students WHERE id = ?',
+        [id]
+    );
+    
+    if (existing.length === 0) {
+        return res.status(404).json({ error: 'Student not found' });
+    }
+    
     // 3. Update student in database
+    
+    await pool.query(
+        'UPDATE students SET first_name = ?, middle_name = ?, last_name = ?, score = ? WHERE id = ?',
+        [firstName, middleName, lastName, score, id]
+    );
+    
+    
     // 4. Return success response
+    res.json({ message: 'Student updated successfully' });
   } catch (error) {
     console.error('Error updating student:', error);
     res.status(500).json({ error: 'Internal server error' });
