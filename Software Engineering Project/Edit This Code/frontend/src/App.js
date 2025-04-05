@@ -79,7 +79,14 @@ function App() {
   // TODO: Implement edit handler
   // Hint: Populate form with student data
   const handleEdit = (student) => {
-    // TODO: Set editing state and form data
+	setEditingId(student.id);
+	setFormData({
+		firstName: student.first_name,
+		middleName: student.middle_name,
+		lastName: student.last_name,
+		studentId: student.id,
+		score: student.score,
+	});
   };
 
 
