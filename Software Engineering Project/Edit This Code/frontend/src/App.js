@@ -109,19 +109,35 @@ const handleDelete = async (id) => {
     if (!validateForm()) return;
 
     try {
-      // TODO: Implement submission logic
-      // 1. Set loading state
-      // 2. Make API request (POST or PUT)
-      // 3. Reset form
-      // 4. Refresh data
-      // 5. Handle errors
+      setLoading(true);
+      if (editingId) {
+        // Update existing student
+        await axios.put(`${API_URL}/students/${editingId}`, formData);
+      } else {
+        // Add new student
+        await axios.post(`${API_URL}/students`, formData);
+      }
+      
+      setFormData({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        studentId: '',
+        score: ''
+      });
+      setEditingId(null);
+      fetchStudents();
+      fetchAverage();
     } catch (error) {
       console.error('Error saving student:', error);
-      // TODO: Handle API errors
+      if (error.response?.data?.error) {
+        setErrors({ submit: error.response.data.error });
+      }
     } finally {
-      // TODO: Reset loading state
+      setLoading(false);
     }
   };
+  
 
   // TODO: Implement cancel handler
   // Hint: Reset form and editing state
