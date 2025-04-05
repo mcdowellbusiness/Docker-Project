@@ -116,7 +116,15 @@ function App() {
   // TODO: Implement cancel handler
   // Hint: Reset form and editing state
   const handleCancel = () => {
-    // TODO: Reset form and editing state
+    setFormData({
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      studentId: '',
+      score: ''
+    });
+    setEditingId(null);
+    setErrors({});
   };
 
   // TODO: Implement sort handler
