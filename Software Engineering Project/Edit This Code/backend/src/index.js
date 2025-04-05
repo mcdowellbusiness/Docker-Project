@@ -23,7 +23,25 @@ const dbConfig = {
 };
 
 // TODO: Create database connection pool
-// Hint: Use mysql.createPool with dbConfig
+// Create database connection pool
+const pool = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Test database connection on startup
+pool.getConnection()
+  .then(conn => {
+    console.log(' Database connection pool established.');
+    conn.release();
+  })
+  .catch(err => {
+    console.error(' Failed to connect to the database:', err);
+    process.exit(1);
+  });
+
 
 // Validation middleware
 const validateStudent = [
