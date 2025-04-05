@@ -124,12 +124,14 @@ const handleDelete = async (id) => {
     // TODO: Reset form and editing state
   };
 
-  // TODO: Implement sort handler
-  // Hint: Toggle sort order and update sort field
-  const handleSort = (field) => {
-    // TODO: Implement sorting logic
+ const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
   };
-
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Course Management System</h1>
