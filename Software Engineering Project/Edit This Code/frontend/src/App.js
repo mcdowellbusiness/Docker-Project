@@ -60,13 +60,18 @@ function App() {
 
   // TODO: Implement form validation
   // Hint: Validate all required fields and their constraints
-  const validateForm = () => {
+   const validateForm = () => {
     const newErrors = {};
-    // TODO: Add validation logic
-    // 1. Validate first name
-    // 2. Validate last name
-    // 3. Validate student ID
-    // 4. Validate score
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.studentId) newErrors.studentId = 'Student ID is required';
+    if (formData.studentId && (formData.studentId < 1 || formData.studentId > 10)) {
+      newErrors.studentId = 'Student ID must be between 1 and 10';
+    }
+    if (!formData.score) newErrors.score = 'Score is required';
+    if (formData.score && (formData.score < 0 || formData.score > 100)) {
+      newErrors.score = 'Score must be between 0 and 100';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -77,16 +82,26 @@ function App() {
     // TODO: Set editing state and form data
   };
 
-  // TODO: Implement delete handler
-  // Hint: Add confirmation dialog and API call
-  const handleDelete = async (id) => {
-    // TODO: Implement delete logic
-    // 1. Show confirmation dialog
-    // 2. Make API request
-    // 3. Refresh data
-    // 4. Handle errors
-  };
 
+const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this student?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.delete(`${API_URL}/students/${id}`);
+      fetchStudents();
+      fetchAverage();
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      if (error.response?.data?.error) {
+        setErrors({ submit: error.response.data.error });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   // TODO: Implement form submission
   // Hint: Handle both create and update cases
   const handleSubmit = async (e) => {
@@ -94,32 +109,58 @@ function App() {
     if (!validateForm()) return;
 
     try {
-      // TODO: Implement submission logic
-      // 1. Set loading state
-      // 2. Make API request (POST or PUT)
-      // 3. Reset form
-      // 4. Refresh data
-      // 5. Handle errors
+      setLoading(true);
+      if (editingId) {
+        // Update existing student
+        await axios.put(`${API_URL}/students/${editingId}`, formData);
+      } else {
+        // Add new student
+        await axios.post(`${API_URL}/students`, formData);
+      }
+      
+      setFormData({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        studentId: '',
+        score: ''
+      });
+      setEditingId(null);
+      fetchStudents();
+      fetchAverage();
     } catch (error) {
       console.error('Error saving student:', error);
-      // TODO: Handle API errors
+      if (error.response?.data?.error) {
+        setErrors({ submit: error.response.data.error });
+      }
     } finally {
-      // TODO: Reset loading state
+      setLoading(false);
     }
   };
+  
 
   // TODO: Implement cancel handler
   // Hint: Reset form and editing state
   const handleCancel = () => {
-    // TODO: Reset form and editing state
+    setFormData({
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      studentId: '',
+      score: ''
+    });
+    setEditingId(null);
+    setErrors({});
   };
 
-  // TODO: Implement sort handler
-  // Hint: Toggle sort order and update sort field
-  const handleSort = (field) => {
-    // TODO: Implement sorting logic
+ const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
   };
-
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Course Management System</h1>

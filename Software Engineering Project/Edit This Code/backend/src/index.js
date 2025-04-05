@@ -23,7 +23,25 @@ const dbConfig = {
 };
 
 // TODO: Create database connection pool
-// Hint: Use mysql.createPool with dbConfig
+// Create database connection pool
+const pool = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Test database connection on startup
+pool.getConnection()
+  .then(conn => {
+    console.log(' Database connection pool established.');
+    conn.release();
+  })
+  .catch(err => {
+    console.error(' Failed to connect to the database:', err);
+    process.exit(1);
+  });
+
 
 // Validation middleware
 const validateStudent = [
@@ -41,7 +59,37 @@ const validateStudent = [
 // Hint: Similar to validateStudent but without studentId validation
 
 // Routes
+app.post('/api/students', validateStudent, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
+    const { firstName, middleName, lastName, studentId, score } = req.body;
+
+    // Check for duplicate student ID
+    const [existing] = await pool.query(
+      'SELECT id FROM students WHERE id = ?',
+      [studentId]
+    );
+
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Student ID already exists' });
+    }
+
+    // Insert new student
+    await pool.query(
+      'INSERT INTO students (id, first_name, middle_name, last_name, score) VALUES (?, ?, ?, ?, ?)',
+      [studentId, firstName, middleName, lastName, score]
+    );
+
+    res.status(201).json({ message: 'Student added successfully' });
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // POST /api/students - Add new student
 app.post('/api/students', validateStudent, async (req, res) => {
   try {
@@ -59,11 +107,18 @@ app.post('/api/students', validateStudent, async (req, res) => {
 // GET /api/students - Get all students with sorting
 app.get('/api/students', async (req, res) => {
   try {
-    // TODO: Implement student retrieval with sorting
-    // 1. Get sort parameters from query string
-    // 2. Validate sort parameters
-    // 3. Query database with sorting
-    // 4. Return sorted students
+    const { sortBy = 'id', order = 'asc' } = req.query;
+    const validSortFields = ['id', 'score', 'first_name', 'last_name'];
+    
+    if (!validSortFields.includes(sortBy)) {
+      return res.status(400).json({ error: 'Invalid sort field' });
+    }
+
+    const [students] = await pool.query(
+      `SELECT * FROM students ORDER BY ${sortBy} ${order === 'desc' ? 'DESC' : 'ASC'}`
+    );
+
+    res.json(students);
   } catch (error) {
     console.error('Error fetching students:', error);
     res.status(500).json({ error: 'Internal server error' });
