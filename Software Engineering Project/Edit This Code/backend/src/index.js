@@ -107,11 +107,18 @@ app.post('/api/students', validateStudent, async (req, res) => {
 // GET /api/students - Get all students with sorting
 app.get('/api/students', async (req, res) => {
   try {
-    // TODO: Implement student retrieval with sorting
-    // 1. Get sort parameters from query string
-    // 2. Validate sort parameters
-    // 3. Query database with sorting
-    // 4. Return sorted students
+    const { sortBy = 'id', order = 'asc' } = req.query;
+    const validSortFields = ['id', 'score', 'first_name', 'last_name'];
+    
+    if (!validSortFields.includes(sortBy)) {
+      return res.status(400).json({ error: 'Invalid sort field' });
+    }
+
+    const [students] = await pool.query(
+      `SELECT * FROM students ORDER BY ${sortBy} ${order === 'desc' ? 'DESC' : 'ASC'}`
+    );
+
+    res.json(students);
   } catch (error) {
     console.error('Error fetching students:', error);
     res.status(500).json({ error: 'Internal server error' });
