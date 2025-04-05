@@ -59,7 +59,37 @@ const validateStudent = [
 // Hint: Similar to validateStudent but without studentId validation
 
 // Routes
+app.post('/api/students', validateStudent, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
+    const { firstName, middleName, lastName, studentId, score } = req.body;
+
+    // Check for duplicate student ID
+    const [existing] = await pool.query(
+      'SELECT id FROM students WHERE id = ?',
+      [studentId]
+    );
+
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Student ID already exists' });
+    }
+
+    // Insert new student
+    await pool.query(
+      'INSERT INTO students (id, first_name, middle_name, last_name, score) VALUES (?, ?, ?, ?, ?)',
+      [studentId, firstName, middleName, lastName, score]
+    );
+
+    res.status(201).json({ message: 'Student added successfully' });
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // POST /api/students - Add new student
 app.post('/api/students', validateStudent, async (req, res) => {
   try {
