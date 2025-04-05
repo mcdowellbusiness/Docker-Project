@@ -99,11 +99,6 @@ app.post('/api/students', validateStudent, async (req, res) => {
 // POST /api/students - Add new student
 app.post('/api/students', validateStudent, async (req, res) => {
   try {
-    // TODO: Implement student creation
-    // 1. Validate request body
-    // 2. Check for duplicate student ID
-    // 3. Insert new student into database
-    // 4. Return success response
   } catch (error) {
     console.error('Error adding student:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -134,10 +129,6 @@ app.get('/api/students', async (req, res) => {
 // GET /api/students/average - Get average score
 app.get('/api/students/average', async (req, res) => {
   try {
-    // TODO: Implement average calculation
-    // 1. Query database for average score
-    // 2. Handle case when no students exist
-   //3. Return average score
    const [result] = await pool.query('SELECT AVG(score) as average FROM students');
     res.json({ average: result[0].average || 0 });
   } catch (error) {
@@ -149,7 +140,6 @@ app.get('/api/students/average', async (req, res) => {
 // PUT /api/students/:id - Update student
 app.put('/api/students/:id', validateStudentUpdate, async (req, res) => {
   try {
-    // TODO: Implement student update
     // 1. Validate request body
     
     const errors = validationResult(req);
@@ -190,10 +180,6 @@ app.put('/api/students/:id', validateStudentUpdate, async (req, res) => {
 // DELETE /api/students/:id - Delete student
 app.delete('/api/students/:id', async (req, res) => {
   try {
-    // TODO: Implement student deletion
-    // 1. Check if student exists
-    // 2. Delete student from database
-    // 3. Return success response
   } catch (error) {
     console.error('Error deleting student:', error);
     res.status(500).json({ error: 'Internal server error' });

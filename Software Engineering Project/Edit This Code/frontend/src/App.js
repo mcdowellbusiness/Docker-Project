@@ -22,15 +22,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // TODO: Implement fetchStudents function
-  // Hint: Use axios to get students from API with sorting parameters
   const fetchStudents = useCallback(async () => {
     try {
-      // TODO: Implement API call
-      // 1. Set loading state
-      // 2. Make API request with sort parameters
-      // 3. Update students state
-      // 4. Handle errors
      setLoading(true);
       const response = await axios.get(`${API_URL}/students`, {
         params: { sortBy, order: sortOrder }
@@ -43,39 +36,22 @@ function App() {
     }
   }, [sortBy, sortOrder]);
 
-  // TODO: Implement fetchAverage function
-  // Hint: Use axios to get average score from API
-  const fetchAverage = useCallback(async () => {
-    try {
-      // TODO: Implement API call
-      // 1. Make API request
-      // 2. Update average state
-      // 3. Handle errors
-    } catch (error) {
-      console.error('Error fetching average:', error);
-      // TODO: Set default average
-    }
-  }, []);
+// Implement fetchAverage function
+const fetchAverage = useCallback(async () => {
+  try {
+    const response = await axios.get(`${API_URL}/students/average`);
+    setAverage(Number(response.data.average));
+  } catch (error) {
+    console.error('Error fetching average:', error);
+    setAverage(0);
+  }
+}, []);
 
-  // Fetch data on component mount and when sort changes
-  useEffect(() => {
-    fetchStudents();
-    fetchAverage();
-  }, [sortBy, sortOrder, fetchStudents, fetchAverage]);
-
-const response = await axios.get(`${API_URL}/students/average`);
-      setAverage(Number(response.data.average));
-    } catch (error) {
-      console.error('Error fetching average:', error);
-      setAverage(0);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchStudents();
-    fetchAverage();
-  }, [sortBy, sortOrder, fetchStudents, fetchAverage]);  // TODO: Implement form validation
-  // Hint: Validate all required fields and their constraints
+// Fetch data on component mount and when sort changes
+useEffect(() => {
+  fetchStudents();
+  fetchAverage();
+}, [sortBy, sortOrder, fetchStudents, fetchAverage]);
    const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
@@ -92,8 +68,6 @@ const response = await axios.get(`${API_URL}/students/average`);
     return Object.keys(newErrors).length === 0;
   };
 
-  // TODO: Implement edit handler
-  // Hint: Populate form with student data
   const handleEdit = (student) => {
 	setEditingId(student.id);
 	setFormData({
@@ -125,8 +99,7 @@ const handleDelete = async (id) => {
       setLoading(false);
     }
   };
-  // TODO: Implement form submission
-  // Hint: Handle both create and update cases
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -160,10 +133,7 @@ const handleDelete = async (id) => {
       setLoading(false);
     }
   };
-  
 
-  // TODO: Implement cancel handler
-  // Hint: Reset form and editing state
   const handleCancel = () => {
     setFormData({
       firstName: '',
