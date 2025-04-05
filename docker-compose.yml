@@ -27,6 +27,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    restart: on-failure
 
   db:
     image: mysql:8.0
