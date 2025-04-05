@@ -55,8 +55,14 @@ const validateStudent = [
     .withMessage('Score must be between 0 and 100')
 ];
 
-// TODO: Add validation middleware for updates
-// Hint: Similar to validateStudent but without studentId validation
+// Add validation middleware for updates
+const validateStudentUpdate = [
+  body('firstName').trim().notEmpty().withMessage('First name is required'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required'),
+  body('score')
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Score must be between 0 and 100')
+];
 
 // Routes
 app.post('/api/students', validateStudent, async (req, res) => {
