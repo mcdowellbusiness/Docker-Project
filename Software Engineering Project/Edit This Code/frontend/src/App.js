@@ -60,13 +60,18 @@ function App() {
 
   // TODO: Implement form validation
   // Hint: Validate all required fields and their constraints
-  const validateForm = () => {
+   const validateForm = () => {
     const newErrors = {};
-    // TODO: Add validation logic
-    // 1. Validate first name
-    // 2. Validate last name
-    // 3. Validate student ID
-    // 4. Validate score
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.studentId) newErrors.studentId = 'Student ID is required';
+    if (formData.studentId && (formData.studentId < 1 || formData.studentId > 10)) {
+      newErrors.studentId = 'Student ID must be between 1 and 10';
+    }
+    if (!formData.score) newErrors.score = 'Score is required';
+    if (formData.score && (formData.score < 0 || formData.score > 100)) {
+      newErrors.score = 'Score must be between 0 and 100';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
