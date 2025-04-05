@@ -82,16 +82,26 @@ function App() {
     // TODO: Set editing state and form data
   };
 
-  // TODO: Implement delete handler
-  // Hint: Add confirmation dialog and API call
-  const handleDelete = async (id) => {
-    // TODO: Implement delete logic
-    // 1. Show confirmation dialog
-    // 2. Make API request
-    // 3. Refresh data
-    // 4. Handle errors
-  };
 
+const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this student?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.delete(`${API_URL}/students/${id}`);
+      fetchStudents();
+      fetchAverage();
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      if (error.response?.data?.error) {
+        setErrors({ submit: error.response.data.error });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   // TODO: Implement form submission
   // Hint: Handle both create and update cases
   const handleSubmit = async (e) => {
@@ -127,12 +137,14 @@ function App() {
     setErrors({});
   };
 
-  // TODO: Implement sort handler
-  // Hint: Toggle sort order and update sort field
-  const handleSort = (field) => {
-    // TODO: Implement sorting logic
+ const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
   };
-
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Course Management System</h1>
