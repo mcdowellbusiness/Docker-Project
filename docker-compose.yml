@@ -3,6 +3,9 @@ version: '3.8'
 services:
   frontend:
     build: ./frontend
+    
+    image: mcdowellbusiness/swe-project:frontend
+
     ports:
       - "3000:3000"
     environment:
@@ -15,6 +18,9 @@ services:
 
   backend:
     build: ./backend
+
+    image: mcdowellbusiness/swe-project:backend
+
     ports:
       - "3001:3001"
     environment:
@@ -27,6 +33,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    restart: on-failure
 
   db:
     image: mysql:8.0

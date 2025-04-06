@@ -22,8 +22,26 @@ const dbConfig = {
   database: process.env.DB_NAME || 'course_management'
 };
 
+// TODO: Create database connection pool
 // Create database connection pool
-const pool = mysql.createPool(dbConfig);
+const pool = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Test database connection on startup
+pool.getConnection()
+  .then(conn => {
+    console.log(' Database connection pool established.');
+    conn.release();
+  })
+  .catch(err => {
+    console.error(' Failed to connect to the database:', err);
+    process.exit(1);
+  });
+
 
 // Validation middleware
 const validateStudent = [
@@ -78,7 +96,16 @@ app.post('/api/students', validateStudent, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+// POST /api/students - Add new student
+app.post('/api/students', validateStudent, async (req, res) => {
+  try {
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
+// GET /api/students - Get all students with sorting
 app.get('/api/students', async (req, res) => {
   try {
     const { sortBy = 'id', order = 'asc' } = req.query;
@@ -99,9 +126,10 @@ app.get('/api/students', async (req, res) => {
   }
 });
 
+// GET /api/students/average - Get average score
 app.get('/api/students/average', async (req, res) => {
   try {
-    const [result] = await pool.query('SELECT AVG(score) as average FROM students');
+   const [result] = await pool.query('SELECT AVG(score) as average FROM students');
     res.json({ average: result[0].average || 0 });
   } catch (error) {
     console.error('Error calculating average:', error);
@@ -109,33 +137,39 @@ app.get('/api/students/average', async (req, res) => {
   }
 });
 
-// Add PUT endpoint for updating a student
+// PUT /api/students/:id - Update student
 app.put('/api/students/:id', validateStudentUpdate, async (req, res) => {
   try {
+    // 1. Validate request body
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
+    
     const { id } = req.params;
     const { firstName, middleName, lastName, score } = req.body;
-
-    // Check if student exists
+    
+    // 2. Check if student exists
+    
     const [existing] = await pool.query(
-      'SELECT id FROM students WHERE id = ?',
-      [id]
+        'SELECT id FROM students WHERE id = ?',
+        [id]
     );
-
+    
     if (existing.length === 0) {
-      return res.status(404).json({ error: 'Student not found' });
+        return res.status(404).json({ error: 'Student not found' });
     }
-
-    // Update student
+    
+    // 3. Update student in database
+    
     await pool.query(
-      'UPDATE students SET first_name = ?, middle_name = ?, last_name = ?, score = ? WHERE id = ?',
-      [firstName, middleName, lastName, score, id]
+        'UPDATE students SET first_name = ?, middle_name = ?, last_name = ?, score = ? WHERE id = ?',
+        [firstName, middleName, lastName, score, id]
     );
-
+    
+    
+    // 4. Return success response
     res.json({ message: 'Student updated successfully' });
   } catch (error) {
     console.error('Error updating student:', error);
@@ -143,7 +177,7 @@ app.put('/api/students/:id', validateStudentUpdate, async (req, res) => {
   }
 });
 
-// Add DELETE endpoint for deleting a student
+// DELETE /api/students/:id - Delete student
 app.delete('/api/students/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -158,7 +192,7 @@ app.delete('/api/students/:id', async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
 
-    // Delete student
+    // Delete student from database
     await pool.query('DELETE FROM students WHERE id = ?', [id]);
 
     res.json({ message: 'Student deleted successfully' });
